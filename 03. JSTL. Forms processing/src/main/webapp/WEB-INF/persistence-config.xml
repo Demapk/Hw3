@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/data/jpa
+             http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <jpa:repositories base-package="ru.kpfu.itis.repository" entity-manager-factory-ref="entityManagerFactory"/>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="ru.kpfu.itis.model"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.default_schema">${hibernate.default_schema}</prop>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop><!-- Вывод в консоль SQL-запросов -->
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop><!-- Автообновление структуры БД -->
+            </props>
+        </property>
+    </bean>
+
+    <tx:annotation-driven/>
+
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+          p:driverClassName="${jdbc.driverClassName}"
+          p:jdbcUrl="${jdbc.url}"
+          p:username="${jdbc.username}"
+          p:password="${jdbc.password}">
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+</beans>

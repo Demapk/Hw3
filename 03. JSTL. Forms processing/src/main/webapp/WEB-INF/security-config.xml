@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://www.springframework.org/schema/security"
+
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!-- Static resources such as CSS and JS files are ignored by Spring Security -->
+    <http pattern="/resources/**" security="none"/>
+
+    <http use-expressions="true">
+        <!-- Настраиваем процесс авторизации -->
+        <csrf disabled="true"/>
+        <access-denied-handler error-page="/403"/>
+        <form-login login-processing-url="/login_process"
+                    login-page="/login"
+                    default-target-url="/"
+                    always-use-default-target="false"
+                    authentication-failure-url="/login?error"
+                    username-parameter="username"
+                    password-parameter="password"/>
+
+        <!-- Определяем адрес для разлогина, страницу перехода при успешном разлогине
+             и указываем на необходимость очистить сессию пользователя -->
+        <logout
+                logout-url="/logout"
+                logout-success-url="/"
+                invalidate-session="true"/>
+
+        <!-- Задаем шаблоны url адресов доступ к которым ограничен, указываем необходимые права доступа -->
+        <intercept-url pattern="/calculator/**" access="hasRole('USER')"/>
+
+    </http>
+
+    <!-- определяем основной механизм авторизации -->
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="authProvider"/>
+    </authentication-manager>
+    <beans:bean id="authProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <beans:property name="userDetailsService" ref="userDetailsService"/>
+        <beans:property name="passwordEncoder" ref="encoder"/>
+    </beans:bean>
+    <beans:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <!-- сервис авторизации -->
+    <beans:bean id="userDetailsService" class="ru.kpfu.itis.service.UserService"/>
+
+</beans:beans>
